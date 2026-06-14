@@ -13,43 +13,33 @@
 
 ---
 
-## 0. Cấu hình thực tế đang chạy (TVH — cập nhật 2026-06-14)
+## 0. Tóm tắt triển khai
 
-> Ghi lại đúng môi trường production hiện tại để khỏi dò lại.
-
-- **URL công khai:** https://your-domain.example.com/meeting/  (backend tại `/meeting/api`)
-- **Cổng nội bộ:** backend `127.0.0.1:8010`, frontend `127.0.0.1:5180`
-  (các cổng khác đã bận bởi app khác).
-- **Reverse proxy:** nginx `your-domain.example.com` (file `/etc/nginx/conf.d/your-site.conf`),
-  có dòng `include /path/to/meeting-recorder/deploy/nginx-meeting.locations;`
-  ngay trước `location / {`. TLS = cert `*.your-domain.example.com` ở
-  `/path/to/certs/your-cert.{crt,key}` (fullchain, hạn 29/12/2026).
-- **STT:** `STT_PROVIDER=openai`, `STT_MODEL=whisper-1` (tiếng Việt). Biên bản: Claude `claude-sonnet-4-6`.
-- **`backend/.env`:** `PUBLIC_BASE_URL=https://your-domain.example.com/meeting/api` (để link MP3 đúng prefix).
-- **Chạy nền bằng pm2** (đã `pm2 save`):
+- **Cổng mặc định:** backend `127.0.0.1:8010`, frontend `127.0.0.1:5180` (đổi tùy môi trường).
+- **STT:** `STT_PROVIDER=openai` (`STT_MODEL=whisper-1`, tiếng Việt) hoặc `local` (faster-whisper).
+  Biên bản: Claude `claude-sonnet-4-6`.
+- **Sau reverse proxy có prefix path:** đặt `PUBLIC_BASE_URL=https://<domain>/<prefix>/api`
+  trong `backend/.env` để link MP3 trả về đúng đường dẫn.
+- **Chạy nền bằng pm2** (chạy backend qua python venv với `-m uvicorn`, vì pm2 hiểu nhầm
+  binary `uvicorn` là script Node):
 
   ```bash
-  # Backend — LƯU Ý: chạy qua python venv với "-m uvicorn"
-  # (pm2 hiểu nhầm binary "uvicorn" là script Node nên sẽ crash)
-  pm2 start /path/to/meeting-recorder/backend/.venv/bin/python \
-    --name meeting-api --cwd /path/to/meeting-recorder/backend \
+  # Backend
+  pm2 start ./backend/.venv/bin/python --name meeting-api --cwd ./backend \
     -- -m uvicorn main:app --host 127.0.0.1 --port 8010
-
   # Frontend
-  pm2 start python3 --name meeting-web \
-    --cwd /path/to/meeting-recorder/frontend \
+  pm2 start python3 --name meeting-web --cwd ./frontend \
     -- -m http.server 5180 --bind 127.0.0.1
-
   pm2 save
   ```
 
-  Quản lý: `pm2 restart meeting-api` (sau khi sửa code), `pm2 logs meeting-api`, `pm2 status`.
+  Quản lý: `pm2 restart meeting-api`, `pm2 logs meeting-api`, `pm2 status`.
 
 - **Chống Whisper "bịa" trên audio im lặng:** backend đặt STT `temperature=0` và có hàm
   `has_speech()` (ffmpeg `silencedetect`) — bản ghi gần như im lặng sẽ bị trả lỗi
   *"Không phát hiện giọng nói rõ…"* thay vì sinh biên bản bịa. → Phải **ghi có giọng nói rõ**.
 
-Các mục dưới đây là hướng dẫn cài đặt tổng quát / các cách triển khai khác.
+Chi tiết cài đặt và các cách triển khai (LAN, ngrok, reverse proxy) ở các mục dưới.
 
 ---
 
