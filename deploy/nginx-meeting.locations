@@ -1,0 +1,40 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║ Meeting Recorder — thêm vào server 443 của your-domain.example.com      ║
+# ║ Chèn bằng 1 dòng include trong your-site.conf (xem README §4).   ║
+# ║ Frontend tĩnh: 127.0.0.1:5180  |  Backend FastAPI: 127.0.0.1:8010 ║
+# ╚══════════════════════════════════════════════════════════════════╝
+
+# Thêm dấu "/" cuối nếu thiếu (để asset tương đối resolve đúng)
+location = /meeting { return 301 /meeting/; }
+
+# ── Backend API: /meeting/api/...  →  127.0.0.1:8010/...  (đặt TRƯỚC /meeting/) ──
+location /meeting/api/ {
+    proxy_set_header Host              $http_host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Connection        '';
+    proxy_http_version 1.1;
+
+    # Upload file lớn + chép lời + gọi Claude → cho timeout cao, tắt buffering
+    client_max_body_size 500M;
+    proxy_request_buffering off;
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_connect_timeout 600s;
+    proxy_send_timeout    600s;
+    proxy_read_timeout    600s;
+
+    rewrite ^/meeting/api/(.*)$ /$1 break;
+    proxy_pass http://127.0.0.1:8010;
+}
+
+# ── Frontend tĩnh: /meeting/...  →  127.0.0.1:5180/... ──
+location /meeting/ {
+    proxy_pass         http://127.0.0.1:5180/;
+    proxy_http_version 1.1;
+    proxy_set_header Host             $http_host;
+    proxy_set_header X-Real-IP        $remote_addr;
+    proxy_set_header X-Forwarded-For  $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}

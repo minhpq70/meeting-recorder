@@ -1,0 +1,7 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+anthropic>=0.69.0
+python-dotenv==1.0.1
+# Chỉ cần khi STT_PROVIDER=local (tự host Whisper). Dùng STT_PROVIDER=openai thì có thể bỏ.
+faster-whisper==1.1.1

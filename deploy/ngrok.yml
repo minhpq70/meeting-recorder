@@ -1,0 +1,16 @@
+version: "3"
+# Cần thêm authtoken trước khi chạy (1 lần):
+#   ngrok config add-authtoken <TOKEN_CUA_BAN>
+# Lấy token tại: https://dashboard.ngrok.com/get-started/your-authtoken
+#
+# Chạy cả 2 tunnel:
+#   ngrok start --all --config ~/.config/ngrok/ngrok.yml \
+#                     --config /path/to/meeting-recorder/deploy/ngrok.yml
+
+tunnels:
+  web:
+    addr: 5180          # frontend (python http.server)
+    proto: http
+  api:
+    addr: 8010          # backend FastAPI
+    proto: http

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Biên bản họp AI</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>📝 Biên bản họp AI</h1>
+    <p class="sub">Ghi âm hoặc tải lên — nhận biên bản tự động</p>
+  </header>
+
+  <main>
+    <!-- Cấu hình server -->
+    <section class="card">
+      <label for="apiBase">Địa chỉ backend</label>
+      <input id="apiBase" type="url" inputmode="url"
+             placeholder="https://your-backend.example.com" />
+      <p class="hint">Dán URL backend (ngrok/tailscale/HTTPS). Sẽ được ghi nhớ trên máy.</p>
+    </section>
+
+    <!-- Nhắc đồng ý -->
+    <p class="consent">
+      ⚠️ Vui lòng đảm bảo <strong>tất cả các bên đã đồng ý</strong> trước khi ghi âm cuộc họp.
+    </p>
+
+    <!-- Khu điều khiển -->
+    <section class="card controls">
+      <button id="recordBtn" class="btn btn-record">
+        <span class="dot"></span> Bắt đầu ghi âm
+      </button>
+      <div id="timer" class="timer" hidden>00:00</div>
+
+      <div class="divider">hoặc</div>
+
+      <label class="btn btn-upload">
+        ⬆️ Tải lên file ghi âm
+        <input id="fileInput" type="file"
+               accept="audio/*,.mp3,.m4a,.webm,.wav,.ogg,.mp4,.aac,.flac" hidden />
+      </label>
+    </section>
+
+    <!-- Tiến trình -->
+    <section id="progress" class="card progress" hidden>
+      <div class="spinner"></div>
+      <p id="progressText">Đang xử lý…</p>
+    </section>
+
+    <!-- Lỗi -->
+    <section id="error" class="card error" hidden></section>
+
+    <!-- Kết quả -->
+    <section id="result" class="result" hidden>
+      <div class="card downloads">
+        <audio id="player" controls></audio>
+        <div class="dl-row">
+          <a id="dlMp3" class="btn btn-sm" download>⬇️ MP3</a>
+          <button id="dlTxt" class="btn btn-sm">⬇️ Transcript (.txt)</button>
+          <button id="dlJson" class="btn btn-sm">⬇️ Biên bản (.json)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Tóm tắt</h2>
+        <p id="tomTat"></p>
+      </div>
+
+      <div class="card">
+        <h2>Điểm chính</h2>
+        <ul id="diemChinh"></ul>
+      </div>
+
+      <div class="card">
+        <h2>Quyết định</h2>
+        <ul id="quyetDinh"></ul>
+      </div>
+
+      <div class="card">
+        <h2>Việc cần làm</h2>
+        <div id="viecCanLam" class="tasks"></div>
+      </div>
+
+      <details class="card">
+        <summary>Xem transcript đầy đủ</summary>
+        <pre id="transcript"></pre>
+      </details>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

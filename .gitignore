@@ -1,0 +1,27 @@
+# Secrets & môi trường
+.env
+*/.env
+**/.env
+
+# Chứng chỉ / khóa riêng (KHÔNG bao giờ commit)
+*.key
+*.crt
+*.pem
+*.ca-bundle
+*.pfx
+*.p12
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*/.venv/
+
+# Dữ liệu runtime (mp3, transcript)
+data/
+backend/data/
+
+# Hệ điều hành / editor
+.DS_Store
+*.log
